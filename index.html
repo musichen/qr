@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Generator</title>
+  <!-- Include the QRCode library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    /* Basic styling */
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; }
+    #qr-code { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>QR Code Generator</h1>
+  <div>
+    <!-- QR Code Type Selection -->
+    <div class="form-group">
+      <label for="qr-type">Select QR Code Type:</label>
+      <select id="qr-type">
+        <option value="url">URL</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="wifi">Wi-Fi</option>
+        <option value="vcontact">Contact (vCard)</option>
+      </select>
+    </div>
+
+    <!-- URL input -->
+    <div class="form-group" id="url-input">
+      <label for="url">Enter URL:</label>
+      <input type="text" id="url">
+    </div>
+
+    <!-- WhatsApp input -->
+    <div class="form-group" id="whatsapp-input" style="display:none;">
+      <label for="whatsapp-phone">Enter WhatsApp phone number (with country code):</label>
+      <input type="text" id="whatsapp-phone">
+    </div>
+
+    <!-- Wi-Fi input -->
+    <div id="wifi-input" style="display:none;">
+      <div class="form-group">
+        <label for="ssid">Enter Wi-Fi SSID (name):</label>
+        <input type="text" id="ssid">
+      </div>
+      <div class="form-group">
+        <label for="password">Enter Wi-Fi Password:</label>
+        <input type="text" id="password">
+      </div>
+      <div class="form-group">
+        <label for="encryption">Choose Encryption Type:</label>
+        <select id="encryption">
+          <option value="WPA">WPA</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">No Password</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- vCard input -->
+    <div id="vcontact-input" style="display:none;">
+      <div class="form-group">
+        <label for="name">Enter Name:</label>
+        <input type="text" id="name">
+      </div>
+      <div class="form-group">
+        <label for="phone-vcard">Enter Phone Number:</label>
+        <input type="text" id="phone-vcard">
+      </div>
+      <div class="form-group">
+        <label for="email">Enter Email:</label>
+        <input type="email" id="email">
+      </div>
+    </div>
+
+    <button id="generate-btn">Generate QR Code</button>
+  </div>
+
+  <!-- Container for the QR Code -->
+  <div id="qr-code"></div>
+
+  <script>
+    // Get references to DOM elements
+    const qrTypeSelect = document.getElementById('qr-type');
+    const urlInput = document.getElementById('url-input');
+    const whatsappInput = document.getElementById('whatsapp-input');
+    const wifiInput = document.getElementById('wifi-input');
+    const vcontactInput = document.getElementById('vcontact-input');
+
+    // Function to update the visible input fields based on the selected type
+    function updateInputVisibility() {
+      urlInput.style.display = 'none';
+      whatsappInput.style.display = 'none';
+      wifiInput.style.display = 'none';
+      vcontactInput.style.display = 'none';
+
+      const selectedType = qrTypeSelect.value;
+      switch (selectedType) {
+        case 'url':
+          urlInput.style.display = 'block';
+          break;
+        case 'whatsapp':
+          whatsappInput.style.display = 'block';
+          break;
+        case 'wifi':
+          wifiInput.style.display = 'block';
+          break;
+        case 'vcontact':
+          vcontactInput.style.display = 'block';
+          break;
+      }
+    }
+
+    // Initialize the input visibility on page load
+    updateInputVisibility();
+
+    // Event listener for QR code type change
+    qrTypeSelect.addEventListener('change', updateInputVisibility);
+
+    // Event listener for Generate QR Code button
+    document.getElementById('generate-btn').addEventListener('click', function() {
+      const selectedType = qrTypeSelect.value;
+      let data = '';
+
+      // Collect data based on the selected QR code type
+      switch (selectedType) {
+        case 'url':
+          var url = document.getElementById('url').value;
+          data = url;
+          break;
+        case 'whatsapp':
+          var phone = document.getElementById('whatsapp-phone').value;
+          data = `https://wa.me/${phone}`;
+          break;
+        case 'wifi':
+          var ssid = document.getElementById('ssid').value;
+          var password = document.getElementById('password').value;
+          var encryption = document.getElementById('encryption').value;
+          data = `WIFI:S:${ssid};T:${encryption};P:${password};;`;
+          break;
+        case 'vcontact':
+          var name = document.getElementById('name').value;
+          var phoneVcard = document.getElementById('phone-vcard').value;
+          var email = document.getElementById('email').value;
+          data = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phoneVcard}\nEMAIL:${email}\nEND:VCARD`;
+          break;
+        default:
+          alert('Unknown type!');
+          return;
+      }
+
+      // Generate the QR code
+      const qrCodeContainer = document.getElementById('qr-code');
+      qrCodeContainer.innerHTML = ''; // Clear previous QR code
+
+      new QRCode(qrCodeContainer, {
+        text: data,
+        width: 300, // Adjust size as needed
+        height: 300,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+    });
+  </script>
+</body>
+</html>
